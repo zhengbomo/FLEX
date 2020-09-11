@@ -7,6 +7,7 @@
 //
 
 #import "FLEXColor.h"
+#import "FLEXSystemMonitorView.h"
 #import "FLEXExplorerToolbar.h"
 #import "FLEXExplorerToolbarItem.h"
 #import "FLEXResources.h"
@@ -20,6 +21,8 @@
 @property (nonatomic, readwrite) FLEXExplorerToolbarItem *recentItem;
 @property (nonatomic, readwrite) FLEXExplorerToolbarItem *moveItem;
 @property (nonatomic, readwrite) FLEXExplorerToolbarItem *closeItem;
+@property (nonatomic, strong, readwrite) FLEXSystemMonitorView *monitorView;
+
 @property (nonatomic, readwrite) UIView *dragHandle;
 
 @property (nonatomic) UIImageView *dragHandleImageView;
@@ -81,6 +84,9 @@
         
         // toolbarItems
         self.toolbarItems = @[_globalsItem, _hierarchyItem, _selectItem, _moveItem, _closeItem];
+        
+        self.monitorView = [FLEXSystemMonitorView new];
+        [self addSubview:self.monitorView];
     }
 
     return self;
@@ -116,7 +122,7 @@
     lastToolbarItemFrame.size.width = CGRectGetMaxX(safeArea) - lastToolbarItemFrame.origin.x;
     lastToolbarItem.frame = lastToolbarItemFrame;
 
-    self.backgroundView.frame = CGRectMake(0, 0, CGRectGetWidth(self.bounds), kToolbarItemHeight);
+    self.backgroundView.frame = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height);
     
     const CGFloat kSelectedViewColorDiameter = [[self class] selectedViewColorIndicatorDiameter];
     const CGFloat kDescriptionLabelHeight = [[self class] descriptionLabelHeight];
@@ -155,6 +161,8 @@
     descriptionLabelFrame.origin.y = kDescriptionVerticalPadding;
     descriptionLabelFrame.size.width = CGRectGetMaxX(self.selectedViewDescriptionContainer.bounds) - kHorizontalPadding - descriptionOriginX;
     self.selectedViewDescriptionLabel.frame = descriptionLabelFrame;
+    
+    self.monitorView.frame = CGRectMake(0, kToolbarItemHeight, CGRectGetWidth(safeArea), [self.class toolbarItemHeight]);
 }
 
 
@@ -241,6 +249,10 @@
     CGFloat height = 0.0;
     height += [[self class] toolbarItemHeight];
     height += [[self class] descriptionContainerHeight];
+    
+    // 添加额外空间，显示fps，内存，cpu
+    height += [[self class] toolbarItemHeight];
+    
     return CGSizeMake(size.width, height);
 }
 
