@@ -20,3 +20,5 @@ DerivedData
 /Example/Pods
 Podfile.lock
 IDEWorkspaceChecks.plist
+tweak/build/
+tweak/.theos/

@@ -1,0 +1,9 @@
+Package: com.bomo.flexloader
+Name: FLEXLoader
+Depends: mobilesubstrate
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: An awesome MobileSubstrate tweak!
+Maintainer: bomo
+Author: bomo
+Section: Tweaks
