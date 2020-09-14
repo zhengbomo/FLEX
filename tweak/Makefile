@@ -13,9 +13,9 @@ FLEXLoader_LDFLAGS = -lz -lsqlite3
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
-# before-package::
-	# @echo "Run FLEX dylib build script..."
-	# ./build_dylib.sh
+before-package::
+	@echo "run FLEX build script..."
+	./pack.sh
 
 after-install::
 	install.exec "killall -9 SpringBoard"
