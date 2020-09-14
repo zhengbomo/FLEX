@@ -6,12 +6,24 @@
 //
 
 #import "FLEXSystemMonitorView.h"
+#import "FLEXExplorerToolbarItem.h"
+#import "FLEXNetworkMITMViewController.h"
 #import "FLEXResources.h"
+#import "FLEXNavigationController.h"
+#import "FLEXExplorerViewController.h"
+#import "FLEXSystemLogViewController.h"
+#import "FLEXManager+Private.h"
+#import "FLEXColor.h"
 #include <mach/mach_types.h>
 #include <mach/mach_init.h>
 #include <mach/task.h>
 #include <mach/vm_map.h>
 #include <mach/thread_act.h>
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <net/if_var.h>
+#include <sys/socket.h>
+
 
 @interface FLEXSystemMonitorItemView: UIView
 
@@ -26,32 +38,53 @@
 
 @property (nonatomic, strong) CADisplayLink *dLink;
 
-@property (nonatomic, copy) NSArray<FLEXSystemMonitorItemView *> *toolbarItems;
+@property (nonatomic, copy) NSArray<UIView *> *toolbarItems;
 
 @property (nonatomic, strong) FLEXSystemMonitorItemView *fpsItem;
 @property (nonatomic, strong) FLEXSystemMonitorItemView *cpuItem;
 @property (nonatomic, strong) FLEXSystemMonitorItemView *memoryItem;
+@property (nonatomic, strong) FLEXSystemMonitorItemView *networkItem;
+@property (nonatomic, strong) FLEXExplorerToolbarItem *logItem;
+@property (nonatomic, strong) FLEXExplorerToolbarItem *netMonitorItem;
+
+
 
 @end
 
 @implementation FLEXSystemMonitorView
+
++ (void)load {
+    // first time
+    uint64_t a, b;
+    [FLEXSystemMonitorView networkInBytes:&a outBytes:&b];
+}
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         self.cpuItem = [[FLEXSystemMonitorItemView alloc] init];
         self.memoryItem = [[FLEXSystemMonitorItemView alloc] init];
         self.fpsItem = [[FLEXSystemMonitorItemView alloc] init];
+        self.networkItem = [[FLEXSystemMonitorItemView alloc] init];
+        self.networkItem.valueLabel.font = [UIFont systemFontOfSize:10];
         
+        self.logItem = [FLEXExplorerToolbarItem itemWithTitle:@"Log" image:FLEXResources.globalsIcon];
+        self.netMonitorItem = [FLEXExplorerToolbarItem itemWithTitle:@"Net" image:FLEXResources.globalsIcon];
+        
+        [self.logItem addTarget:self action:@selector(showLog) forControlEvents:UIControlEventTouchUpInside];
+        [self.netMonitorItem addTarget:self action:@selector(showNetMonitor) forControlEvents:UIControlEventTouchUpInside];
         
         [self.cpuItem updateTitle:@"CPU" content:@""];
-        [self.memoryItem updateTitle:@"MEM" content:@""];
+        [self.memoryItem updateTitle:@"Memory" content:@""];
         [self.fpsItem updateTitle:@"FPS" content:@""];
+        [self.networkItem updateTitle:@"Network" content:@""];
+        [self.networkItem updateTitle:@"Network" content:@""];
+        
         
         self.toolbarItems = @[
-            self.cpuItem, self.memoryItem, self.fpsItem
+            self.cpuItem, self.memoryItem, self.fpsItem, self.networkItem, self.logItem, self.netMonitorItem
         ];
         
-        for (FLEXSystemMonitorItemView *toolbarItem in self.toolbarItems) {
+        for (UIView *toolbarItem in self.toolbarItems) {
             [self addSubview:toolbarItem];
         }
         
@@ -60,13 +93,25 @@
     return self;
 }
 
+- (void)showLog {
+    FLEXSystemLogViewController *vc = [[FLEXSystemLogViewController alloc] init];
+    FLEXNavigationController *navVC = [FLEXNavigationController withRootViewController:vc];
+    [FLEXManager.sharedManager.explorerViewController presentViewController:navVC animated:YES completion:nil];
+}
+
+- (void)showNetMonitor {
+    UIViewController *vc = [[FLEXNetworkMITMViewController alloc] init];
+    FLEXNavigationController *navVC = [FLEXNavigationController withRootViewController:vc];
+    [FLEXManager.sharedManager.explorerViewController presentViewController:navVC animated:YES completion:nil];
+}
+
 - (void)layoutSubviews {
     [super layoutSubviews];
     
     CGFloat height = self.bounds.size.height;
     CGFloat width = self.bounds.size.width / self.toolbarItems.count;
     CGFloat originX = 0;
-    for (FLEXSystemMonitorItemView *toolbarItem in self.toolbarItems) {
+    for (UIView *toolbarItem in self.toolbarItems) {
         CGRect frame = CGRectMake(originX, 0, width, height);
         toolbarItem.frame = frame;
         originX = CGRectGetMaxX(frame);
@@ -111,9 +156,27 @@ static NSInteger _fps = 0;
     [self.cpuItem updateContent:cpuMsg];
     
     uint64_t memoryByte = FLEXSystemMonitorView.memoryUsage;
-    uint64_t memoryMB = memoryByte / 1024 / 1024;
-    NSString *memoryMsg = [NSString stringWithFormat:@"%@MB", @(memoryMB)];
+    NSString *memoryMsg = [self descForBytes:memoryByte];
     [self.memoryItem updateContent:memoryMsg];
+    
+    // 网络流量
+    uint64_t netInBytes = 0;
+    uint64_t netOutBytes = 0;
+    [FLEXSystemMonitorView networkInBytes:&netInBytes outBytes:&netOutBytes];
+    NSString *netMsg = [NSString stringWithFormat:@"↓%@\n↑%@", [self descForBytes:netInBytes], [self descForBytes:netOutBytes]];
+    [self.networkItem updateContent:netMsg];
+}
+
+- (NSString *)descForBytes:(uint64_t)bytes {
+    if (bytes < 1024) {
+        return [NSString stringWithFormat:@"%.2fB", bytes * 1.0];
+    } else if (bytes < 1024 * 1024) {
+        return [NSString stringWithFormat:@"%.2fKB", bytes / 1024.0];
+    } else if (bytes < 1024 * 1024 * 1024) {
+        return [NSString stringWithFormat:@"%.2fMB", bytes / 1024.0 / 1024];
+    } else {
+        return [NSString stringWithFormat:@"%.2fGB", bytes / 1024.0 / 1024 / 1024];
+    }
 }
 
 /// 内存占用
@@ -158,6 +221,54 @@ static NSInteger _fps = 0;
     return cpuUsage;
 }
 
+static uint64_t originInByte = 0;
+static uint64_t originOutByte = 0;
+
+/// 网络流量
++ (void)networkInBytes:(uint64_t *)inBytes outBytes:(uint64_t *)outBytes {
+    struct ifaddrs *ifa_list = 0, *ifa;
+    if (getifaddrs(&ifa_list) == -1) {
+        return;
+    }
+   
+    uint64_t iBytes = 0;
+    uint64_t oBytes = 0;
+   
+    for (ifa = ifa_list; ifa; ifa = ifa->ifa_next) {
+        if (AF_LINK != ifa->ifa_addr->sa_family)
+            continue;
+        if (!(ifa->ifa_flags & IFF_UP) && !(ifa->ifa_flags & IFF_RUNNING))
+            continue;
+        if (ifa->ifa_data == 0)
+            continue;
+       
+        
+        NSString *name = @(ifa->ifa_name);
+        if ([name hasPrefix:@"en"]) {
+            // WIFI
+            struct if_data *if_data = (struct if_data *)ifa->ifa_data;
+            iBytes += if_data->ifi_ibytes;
+            oBytes += if_data->ifi_obytes;
+        } else if ([name hasPrefix:@"pdp_ip"]) {
+            // WWAN
+            struct if_data *if_data = (struct if_data *)ifa->ifa_data;
+            iBytes += if_data->ifi_ibytes;
+            oBytes += if_data->ifi_obytes;
+        }
+    }
+    
+    if (originInByte == 0) {
+        originInByte = iBytes;
+        originOutByte = oBytes;
+    }
+    
+    freeifaddrs(ifa_list);
+    
+    *inBytes = iBytes - originInByte;
+    *outBytes = oBytes - originOutByte;
+}
+
+
 @end
 
 @implementation FLEXSystemMonitorItemView
@@ -165,14 +276,16 @@ static NSInteger _fps = 0;
 - (instancetype)initWithFrame:(CGRect)frame {
     
     if (self = [super initWithFrame:frame]) {
+        self.userInteractionEnabled = NO;
         self.titleLabel = [[UILabel alloc] init];
-        self.titleLabel.textColor = UIColor.blackColor;
+        self.titleLabel.textColor = FLEXColor.primaryTextColor;
         self.titleLabel.textAlignment = NSTextAlignmentCenter;
         self.titleLabel.font = [UIFont systemFontOfSize:12];
         [self addSubview:self.titleLabel];
         
         self.valueLabel = [[UILabel alloc] init];
-        self.valueLabel.textColor = UIColor.blackColor;
+        self.valueLabel.numberOfLines = 0;
+        self.valueLabel.textColor = FLEXColor.primaryTextColor;
         self.valueLabel.textAlignment = NSTextAlignmentCenter;
         self.valueLabel.font = [UIFont systemFontOfSize:14];
         [self addSubview:self.valueLabel];
@@ -185,8 +298,9 @@ static NSInteger _fps = 0;
     
     CGSize size = self.bounds.size;
     
-    self.valueLabel.frame = CGRectMake(0, 0, size.width, size.height * 0.5);
-    self.titleLabel.frame = CGRectMake(0, size.height * 0.5, size.width, size.height * 0.5);
+    CGFloat valuePercent = 0.7;
+    self.valueLabel.frame = CGRectMake(0, 0, size.width, size.height * valuePercent);
+    self.titleLabel.frame = CGRectMake(0, size.height * valuePercent, size.width, size.height * (1 - valuePercent));
 }
 
 - (void)updateTitle:(NSString *)title content:(NSString *)content {

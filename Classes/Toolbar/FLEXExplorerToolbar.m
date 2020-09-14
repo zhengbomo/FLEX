@@ -162,7 +162,7 @@
     descriptionLabelFrame.size.width = CGRectGetMaxX(self.selectedViewDescriptionContainer.bounds) - kHorizontalPadding - descriptionOriginX;
     self.selectedViewDescriptionLabel.frame = descriptionLabelFrame;
     
-    self.monitorView.frame = CGRectMake(0, kToolbarItemHeight, CGRectGetWidth(safeArea), [self.class toolbarItemHeight]);
+    self.monitorView.frame = CGRectMake(0, kToolbarItemHeight + kDescriptionVerticalPadding, CGRectGetWidth(safeArea), [self.class toolbarItemHeight]);
 }
 
 
