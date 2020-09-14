@@ -28,7 +28,6 @@ typedef NS_ENUM(NSUInteger, FLEXCollectionType) {
 @end
 
 @implementation FLEXCollectionContentSection
-@synthesize filterText = _filterText;
 
 #pragma mark Initialization
 
@@ -151,6 +150,10 @@ typedef NS_ENUM(NSUInteger, FLEXCollectionType) {
     return self.cachedCollection.count;
 }
 
+- (NSString *)filterText {
+    return super.filterText;
+}
+
 - (void)setFilterText:(NSString *)filterText {
     super.filterText = filterText;
     
@@ -172,10 +175,25 @@ typedef NS_ENUM(NSUInteger, FLEXCollectionType) {
 }
 
 - (void)reloadData {
-    if (self.collectionFuture) {
-        self.cachedCollection = self.collectionFuture(self);
+    NSString *filterText = self.filterText;
+    if (filterText.length == 0) {
+        if (self.collectionFuture) {
+            self.cachedCollection = self.collectionFuture(self);
+        } else {
+            self.cachedCollection = self.collection.copy;
+        }
     } else {
-        self.cachedCollection = self.collection.copy;
+        BOOL (^matcher)(id, id) = self.customFilter ?: ^BOOL(NSString *query, id obj) {
+            return [[self describe:obj] localizedCaseInsensitiveContainsString:query];
+        };
+        
+        NSPredicate *filter = [NSPredicate predicateWithBlock:^BOOL(id obj, NSDictionary *bindings) {
+            return matcher(filterText, obj);
+        }];
+        
+        id<FLEXMutableCollection> tmp = self.collection.mutableCopy;
+        [tmp filterUsingPredicate:filter];
+        self.cachedCollection = tmp;
     }
 }
 
