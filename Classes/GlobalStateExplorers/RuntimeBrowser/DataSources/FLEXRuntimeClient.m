@@ -111,6 +111,13 @@ static inline NSString * TBWildcardMap(NSString *token, NSString *candidate, TBW
             return @(imageNames[i]);
         }];
 
+        // filter system lib
+        NSString *appFolder = [NSBundle.mainBundle.executablePath stringByDeletingLastPathComponent];
+        imageNameStrings = [[imageNameStrings flex_filtered:^BOOL(NSString *obj, NSUInteger idx) {
+            return [obj hasPrefix:appFolder] &&
+                ![obj.pathExtension isEqualToString:@"dylib"];
+        }] mutableCopy];
+
         self.imagePaths = imageNameStrings;
         free(imageNames);
 
