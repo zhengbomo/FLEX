@@ -278,6 +278,7 @@ static uint64_t originOutByte = 0;
     if (self = [super initWithFrame:frame]) {
         self.userInteractionEnabled = NO;
         self.titleLabel = [[UILabel alloc] init];
+        self.titleLabel.adjustsFontSizeToFitWidth = YES;
         self.titleLabel.textColor = FLEXColor.primaryTextColor;
         self.titleLabel.textAlignment = NSTextAlignmentCenter;
         self.titleLabel.font = [UIFont systemFontOfSize:12];
@@ -285,6 +286,7 @@ static uint64_t originOutByte = 0;
         
         self.valueLabel = [[UILabel alloc] init];
         self.valueLabel.numberOfLines = 0;
+        self.valueLabel.adjustsFontSizeToFitWidth = YES;
         self.valueLabel.textColor = FLEXColor.primaryTextColor;
         self.valueLabel.textAlignment = NSTextAlignmentCenter;
         self.valueLabel.font = [UIFont systemFontOfSize:14];
