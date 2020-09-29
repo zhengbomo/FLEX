@@ -69,6 +69,7 @@ CGFloat const kFLEXDebounceForExpensiveIO = 0.5;
         _searchBarDebounceInterval = kFLEXDebounceFast;
         _showSearchBarInitially = YES;
         _style = style;
+        _pinSearchBar = YES;
         _manuallyDeactivateSearchOnDisappear = ({
             NSProcessInfo.processInfo.operatingSystemVersion.majorVersion < 11;
         });

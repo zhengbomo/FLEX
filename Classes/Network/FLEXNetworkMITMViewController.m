@@ -8,6 +8,7 @@
 
 #import "FLEXColor.h"
 #import "FLEXUtility.h"
+#import "FLEXNetworkFilterViewController.h"
 #import "FLEXNetworkMITMViewController.h"
 #import "FLEXNetworkTransaction.h"
 #import "FLEXNetworkRecorder.h"
@@ -23,7 +24,10 @@
 
 /// Backing model
 @property (nonatomic, copy) NSArray<FLEXNetworkTransaction *> *networkTransactions;
-@property (nonatomic) long long bytesReceived;
+
+@property (nonatomic, copy) NSArray<NSString *> *filterMethods;
+@property (nonatomic, copy) NSArray<NSString *> *filterDomains;
+
 @property (nonatomic, copy) NSArray<FLEXNetworkTransaction *> *filteredNetworkTransactions;
 @property (nonatomic) long long filteredBytesReceived;
 
@@ -45,13 +49,18 @@
     [super viewDidLoad];
 
     self.showsSearchBar = YES;
-    self.showSearchBarInitially = NO;
+    self.showSearchBarInitially = YES;
     
     [self addToolbarItems:@[
         [UIBarButtonItem
             itemWithImage:FLEXResources.gearIcon
             target:self
             action:@selector(settingsButtonTapped:)
+        ],
+        [UIBarButtonItem
+         systemItem:UIBarButtonSystemItemSearch
+            target:self
+            action:@selector(filterButtonTapped:)
         ],
         [[UIBarButtonItem
           systemItem:UIBarButtonSystemItemTrash
@@ -109,6 +118,33 @@
 
 #pragma mark Button Actions
 
+- (void)filterButtonTapped:(UIBarButtonItem *)sender {
+    // 过滤
+    FLEXNetworkFilterViewController *vc = [[FLEXNetworkFilterViewController alloc] init];
+    
+    NSMutableSet *domainSet = [NSMutableSet set];
+    NSMutableSet *methodSet = [NSMutableSet set];
+    for (FLEXNetworkTransaction *transaction in self.networkTransactions) {
+        [domainSet addObject:transaction.request.URL.host];
+        [methodSet addObject:transaction.request.HTTPMethod];
+    }
+    
+    vc.domains = domainSet.allObjects;
+    vc.methods = methodSet.allObjects;
+    [vc updateSelectedMethods:self.filterMethods domains:self.filterDomains];
+    
+    __weak typeof(self) weakSelf = self;
+    vc.callback = ^(NSArray<NSString *> * methods, NSArray<NSString *> * domains) {
+        weakSelf.filterMethods = methods;
+        weakSelf.filterDomains = domains;
+        
+        // 更新ui
+        [weakSelf updateSearchResults:weakSelf.searchText];
+    };
+    UIViewController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+    [self presentViewController:nav animated:YES completion:nil];
+}
+
 - (void)settingsButtonTapped:(UIBarButtonItem *)sender {
     UIViewController *settings = [FLEXNetworkSettingsController new];
     settings.navigationItem.rightBarButtonItem = FLEXBarButtonItemSystem(
@@ -140,24 +176,14 @@
 #pragma mark Transactions
 
 - (void)updateTransactions {
-    self.networkTransactions = [FLEXNetworkRecorder.defaultRecorder networkTransactions];
+    [self updateSearchResults:FLEXNetworkRecorder.defaultRecorder.networkTransactions];
 }
 
 - (void)setNetworkTransactions:(NSArray<FLEXNetworkTransaction *> *)networkTransactions {
     if (![_networkTransactions isEqual:networkTransactions]) {
         _networkTransactions = networkTransactions;
-        [self updateBytesReceived];
         [self updateFilteredBytesReceived];
     }
-}
-
-- (void)updateBytesReceived {
-    long long bytesReceived = 0;
-    for (FLEXNetworkTransaction *transaction in self.networkTransactions) {
-        bytesReceived += transaction.receivedDataLength;
-    }
-    self.bytesReceived = bytesReceived;
-    [self updateFirstSectionHeader];
 }
 
 - (void)setFilteredNetworkTransactions:(NSArray<FLEXNetworkTransaction *> *)networkTransactions {
@@ -190,13 +216,8 @@
 - (NSString *)headerText {
     long long bytesReceived = 0;
     NSInteger totalRequests = 0;
-    if (self.searchController.isActive) {
-        bytesReceived = self.filteredBytesReceived;
-        totalRequests = self.filteredNetworkTransactions.count;
-    } else {
-        bytesReceived = self.bytesReceived;
-        totalRequests = self.networkTransactions.count;
-    }
+    bytesReceived = self.filteredBytesReceived;
+    totalRequests = self.filteredNetworkTransactions.count;
     
     NSString *byteCountText = [NSByteCountFormatter
         stringFromByteCount:bytesReceived countStyle:NSByteCountFormatterCountStyleBinary
@@ -247,14 +268,13 @@
 #pragma mark - Notification Handlers
 
 - (void)handleNewTransactionRecordedNotification:(NSNotification *)notification {
-    [self tryUpdateTransactions];
+    [self updateTransactions];
 }
 
 - (void)tryUpdateTransactions {
     // Don't do any view updating if we aren't in the view hierarchy
     if (!self.viewIfLoaded.window) {
         [self updateTransactions];
-        self.pendingReload = YES;
         return;
     }
     
@@ -284,13 +304,14 @@
             self.rowInsertInProgress = YES;
             [CATransaction setCompletionBlock:^{
                 self.rowInsertInProgress = NO;
-                [self tryUpdateTransactions];
+                [self updateTransactions];
             }];
 
             NSMutableArray<NSIndexPath *> *indexPathsToReload = [NSMutableArray new];
             for (NSInteger row = 0; row < addedRowCount; row++) {
                 [indexPathsToReload addObject:[NSIndexPath indexPathForRow:row inSection:0]];
             }
+            
             [self.tableView insertRowsAtIndexPaths:indexPathsToReload withRowAnimation:UITableViewRowAnimationAutomatic];
 
             [CATransaction commit];
@@ -305,7 +326,6 @@
 }
 
 - (void)handleTransactionUpdatedNotification:(NSNotification *)notification {
-    [self updateBytesReceived];
     [self updateFilteredBytesReceived];
 
     FLEXNetworkTransaction *transaction = notification.userInfo[kFLEXNetworkRecorderUserInfoTransactionKey];
@@ -337,7 +357,7 @@
 #pragma mark - Table view data source
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.searchController.isActive ? self.filteredNetworkTransactions.count : self.networkTransactions.count;
+    return self.filteredNetworkTransactions.count;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
@@ -415,7 +435,7 @@
                     [blacklist addObject:request.URL.host];
                     [FLEXNetworkRecorder.defaultRecorder clearBlacklistedTransactions];
                     [FLEXNetworkRecorder.defaultRecorder synchronizeBlacklist];
-                    [self tryUpdateTransactions];
+                    [self updateTransactions];
                 }
             ];
             return [UIMenu
@@ -430,28 +450,65 @@
 #endif
 
 - (FLEXNetworkTransaction *)transactionAtIndexPath:(NSIndexPath *)indexPath {
-    return self.searchController.isActive ? self.filteredNetworkTransactions[indexPath.row] : self.networkTransactions[indexPath.row];
+    return self.filteredNetworkTransactions[indexPath.row];
 }
 
 
 #pragma mark - Search Bar
 
-- (void)updateSearchResults:(NSString *)searchString {
-    if (!searchString.length) {
-        self.filteredNetworkTransactions = self.networkTransactions;
-        [self.tableView reloadData];
-    } else {
-        [self onBackgroundQueue:^NSArray *{
-            return [self.networkTransactions flex_filtered:^BOOL(FLEXNetworkTransaction *entry, NSUInteger idx) {
-                return [entry.request.URL.absoluteString localizedCaseInsensitiveContainsString:searchString];
-            }];
-        } thenOnMainQueue:^(NSArray *filteredNetworkTransactions) {
-            if ([self.searchText isEqual:searchString]) {
-                self.filteredNetworkTransactions = filteredNetworkTransactions;
-                [self.tableView reloadData];
+
+- (void)updateSearchResults:(NSArray *)networkTransactions {
+    NSArray *methods = self.filterMethods;
+    NSArray *domains = self.filterDomains;
+    NSString *searchString = self.searchText;
+    
+    [self onBackgroundQueue:^NSArray *{
+        return [networkTransactions flex_filtered:^BOOL(FLEXNetworkTransaction *entry, NSUInteger idx) {
+            if (searchString.length > 0 && ![entry.request.URL.absoluteString localizedCaseInsensitiveContainsString:searchString]) {
+                return NO;
             }
+            if (methods.count > 0 && ![methods containsObject:entry.request.HTTPMethod]) {
+                return NO;
+            }
+            if (domains.count > 0 && ![domains containsObject:entry.request.URL.host]) {
+                return NO;
+            }
+            return YES;
         }];
-    }
+    } thenOnMainQueue:^(NSArray *filteredNetworkTransactions) {
+        self.networkTransactions = networkTransactions;
+        self.filteredNetworkTransactions = filteredNetworkTransactions;
+        
+        // TODO: try transaction
+    }];
+}
+
+- (void)updateSearchResults:(NSString *)searchString {
+    NSArray *methods = self.filterMethods;
+    NSArray *domains = self.filterDomains;
+    
+    [self onBackgroundQueue:^NSArray *{
+        return [self.networkTransactions flex_filtered:^BOOL(FLEXNetworkTransaction *entry, NSUInteger idx) {
+            if (searchString.length > 0 && ![entry.request.URL.absoluteString localizedCaseInsensitiveContainsString:searchString]) {
+                return NO;
+            }
+            if (methods.count > 0 && ![methods containsObject:entry.request.HTTPMethod]) {
+                return NO;
+            }
+            if (domains.count > 0 && ![domains containsObject:entry.request.URL.host]) {
+                return NO;
+            }
+            return YES;
+        }];
+    } thenOnMainQueue:^(NSArray *filteredNetworkTransactions) {
+        if (self.rowInsertInProgress) {
+            return;
+        }
+        if ([self.searchText isEqual:searchString]) {
+            self.filteredNetworkTransactions = filteredNetworkTransactions;
+            [self.tableView reloadData];
+        }
+    }];
 }
 
 
@@ -470,3 +527,4 @@
 }
 
 @end
+

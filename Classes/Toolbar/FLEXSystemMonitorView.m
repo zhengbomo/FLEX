@@ -105,6 +105,7 @@
 
 - (void)showNetMonitor {
     UIViewController *vc = [[FLEXNetworkMITMViewController alloc] init];
+    vc.title = @"📡  Network History";
     FLEXNavigationController *navVC = [FLEXNavigationController withRootViewController:vc];
     [FLEXManager.sharedManager.explorerViewController presentViewController:navVC animated:YES completion:nil];
 }

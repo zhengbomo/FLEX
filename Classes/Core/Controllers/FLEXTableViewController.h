@@ -87,7 +87,7 @@ extern CGFloat const kFLEXDebounceForExpensiveIO;
 /// Calls into self.navigationItem.hidesSearchBarWhenScrolling.
 /// Do not change self.navigationItem.hidesSearchBarWhenScrolling directly,
 /// or it will not be respsected. Use this instead.
-/// Defaults to NO.
+/// Defaults to YES.
 @property (nonatomic) BOOL pinSearchBar;
 /// By default, we will show the search bar's cancel button when
 /// search becomes active and hide it when search is dismissed.
