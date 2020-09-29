@@ -22,3 +22,5 @@ Podfile.lock
 IDEWorkspaceChecks.plist
 tweak/build/
 tweak/.theos/
+tweak/packages/
+tweak/layout/usr/lib/FLEXLoader/FLEX.framework/
