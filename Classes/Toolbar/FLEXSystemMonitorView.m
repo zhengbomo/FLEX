@@ -59,6 +59,10 @@
     [FLEXSystemMonitorView networkInBytes:&a outBytes:&b];
 }
 
++ (CGFloat)viewHeight {
+    return 44 * 2;
+}
+
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         self.cpuItem = [[FLEXSystemMonitorItemView alloc] init];
@@ -108,7 +112,7 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
     
-    CGFloat height = self.bounds.size.height;
+    CGFloat height = 44;
     CGFloat width = self.bounds.size.width / self.toolbarItems.count;
     CGFloat originX = 0;
     for (UIView *toolbarItem in self.toolbarItems) {

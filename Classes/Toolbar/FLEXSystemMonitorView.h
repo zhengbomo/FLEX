@@ -9,4 +9,6 @@
 
 @interface FLEXSystemMonitorView : UIView
 
++ (CGFloat)viewHeight;
+
 @end

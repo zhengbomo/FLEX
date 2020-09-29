@@ -162,7 +162,7 @@
     descriptionLabelFrame.size.width = CGRectGetMaxX(self.selectedViewDescriptionContainer.bounds) - kHorizontalPadding - descriptionOriginX;
     self.selectedViewDescriptionLabel.frame = descriptionLabelFrame;
     
-    self.monitorView.frame = CGRectMake(0, kToolbarItemHeight + kDescriptionVerticalPadding, CGRectGetWidth(safeArea), [self.class toolbarItemHeight]);
+    self.monitorView.frame = CGRectMake(0, kToolbarItemHeight + kDescriptionVerticalPadding, CGRectGetWidth(safeArea), FLEXSystemMonitorView.viewHeight);
 }
 
 
@@ -251,7 +251,7 @@
     height += [[self class] descriptionContainerHeight];
     
     // 添加额外空间，显示fps，内存，cpu
-    height += [[self class] toolbarItemHeight];
+    height += FLEXSystemMonitorView.viewHeight;
     
     return CGSizeMake(size.width, height);
 }
