@@ -350,6 +350,8 @@
 		C3F977882311B38F0032776D /* NSObject+FLEX_Reflection.m in Sources */ = {isa = PBXBuildFile; fileRef = C3F977822311B38F0032776D /* NSObject+FLEX_Reflection.m */; };
 		F753ED07250F794D00C7A2A7 /* FLEXSystemMonitorView.m in Sources */ = {isa = PBXBuildFile; fileRef = F753ED05250F794D00C7A2A7 /* FLEXSystemMonitorView.m */; };
 		F753ED08250F794D00C7A2A7 /* FLEXSystemMonitorView.h in Headers */ = {isa = PBXBuildFile; fileRef = F753ED06250F794D00C7A2A7 /* FLEXSystemMonitorView.h */; };
+		F7C842732523498200ECBA7A /* FLEXNetworkFilterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F7C842712523498200ECBA7A /* FLEXNetworkFilterViewController.m */; };
+		F7C842742523498200ECBA7A /* FLEXNetworkFilterViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = F7C842722523498200ECBA7A /* FLEXNetworkFilterViewController.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -712,6 +714,8 @@
 		C3F977822311B38F0032776D /* NSObject+FLEX_Reflection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+FLEX_Reflection.m"; sourceTree = "<group>"; };
 		F753ED05250F794D00C7A2A7 /* FLEXSystemMonitorView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FLEXSystemMonitorView.m; sourceTree = "<group>"; };
 		F753ED06250F794D00C7A2A7 /* FLEXSystemMonitorView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLEXSystemMonitorView.h; sourceTree = "<group>"; };
+		F7C842712523498200ECBA7A /* FLEXNetworkFilterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FLEXNetworkFilterViewController.m; sourceTree = "<group>"; };
+		F7C842722523498200ECBA7A /* FLEXNetworkFilterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLEXNetworkFilterViewController.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -970,6 +974,8 @@
 				3A4C94C01B5B21410088C3F2 /* FLEXNetworkTransactionCell.m */,
 				2EF6B04C1D494BE50006BDA5 /* FLEXNetworkCurlLogger.h */,
 				2EF6B04B1D494BE50006BDA5 /* FLEXNetworkCurlLogger.m */,
+				F7C842722523498200ECBA7A /* FLEXNetworkFilterViewController.h */,
+				F7C842712523498200ECBA7A /* FLEXNetworkFilterViewController.m */,
 				3A4C94C11B5B21410088C3F2 /* PonyDebugger */,
 			);
 			path = Network;
@@ -1543,6 +1549,7 @@
 				71E1C2142307FBB800F5032A /* FLEXKeychainViewController.h in Headers */,
 				3A4C94F71B5B21410088C3F2 /* FLEXArgumentInputNotSupportedView.h in Headers */,
 				C3F31D3E2267D883003C991A /* FLEXTableViewCell.h in Headers */,
+				F7C842742523498200ECBA7A /* FLEXNetworkFilterViewController.h in Headers */,
 				3A4C94E51B5B21410088C3F2 /* FLEXUtility.h in Headers */,
 				2EF6B04E1D494BE50006BDA5 /* FLEXNetworkCurlLogger.h in Headers */,
 				C386D6E924199C1B00699085 /* FLEX-Core.h in Headers */,
@@ -1751,6 +1758,7 @@
 				C301994B2409B38A00759E8E /* CALayer+FLEX.m in Sources */,
 				3A4C95081B5B21410088C3F2 /* FLEXDefaultEditorViewController.m in Sources */,
 				779B1ED11C0C4D7C001F5E49 /* FLEXMultiColumnTableView.m in Sources */,
+				F7C842732523498200ECBA7A /* FLEXNetworkFilterViewController.m in Sources */,
 				C36FBFD0230F3B98008D95D5 /* FLEXProperty.m in Sources */,
 				C3A9424E23C78CFF006871A3 /* FHSViewSnapshot.m in Sources */,
 				C398625623AD6C67007E6793 /* FLEXRuntimeBrowserToolbar.m in Sources */,
