@@ -100,14 +100,14 @@
 - (void)showLog {
     FLEXSystemLogViewController *vc = [[FLEXSystemLogViewController alloc] init];
     FLEXNavigationController *navVC = [FLEXNavigationController withRootViewController:vc];
-    [FLEXManager.sharedManager.explorerViewController presentViewController:navVC animated:YES completion:nil];
+    [FLEXManager2.sharedManager.explorerViewController presentViewController:navVC animated:YES completion:nil];
 }
 
 - (void)showNetMonitor {
     UIViewController *vc = [[FLEXNetworkMITMViewController alloc] init];
     vc.title = @"📡  Network History";
     FLEXNavigationController *navVC = [FLEXNavigationController withRootViewController:vc];
-    [FLEXManager.sharedManager.explorerViewController presentViewController:navVC animated:YES completion:nil];
+    [FLEXManager2.sharedManager.explorerViewController presentViewController:navVC animated:YES completion:nil];
 }
 
 - (void)layoutSubviews {
@@ -194,7 +194,7 @@ static NSInteger _fps = 0;
     return vmInfo.phys_footprint;
 }
 
-/// CPU占用
+/// CPU占用，需要除1000
 + (integer_t)cpuUsage {
     thread_act_array_t threads; //int 组成的数组比如 thread[1] = 5635
     mach_msg_type_number_t threadCount = 0; //mach_msg_type_number_t 是 int 类型
@@ -218,7 +218,7 @@ static NSInteger _fps = 0;
             // 获取 CPU 使用率
             threadBaseInfo = (thread_basic_info_t)threadInfo;
             if (!(threadBaseInfo->flags & TH_FLAGS_IDLE)) {
-                cpuUsage += threadBaseInfo->cpu_usage;
+                cpuUsage += (threadBaseInfo->cpu_usage / TH_USAGE_SCALE);
             }
         }
     }

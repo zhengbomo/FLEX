@@ -13,7 +13,7 @@
 #import "FLEXObjectExplorerFactory.h"
 #import "NSUserDefaults+FLEX.h"
 
-@implementation FLEXManager (Networking)
+@implementation FLEXManager2 (Networking)
 
 + (void)load {
     if (NSUserDefaults.standardUserDefaults.flex_registerDictionaryJSONViewerOnLaunch) {

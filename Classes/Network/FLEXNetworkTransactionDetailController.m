@@ -483,7 +483,7 @@ typedef UIViewController *(^FLEXNetworkDetailRowSelectionFuture)(void);
 }
 
 + (UIViewController *)detailViewControllerForMIMEType:(NSString *)mimeType data:(NSData *)data {
-    FLEXCustomContentViewerFuture makeCustomViewer = FLEXManager.sharedManager.customContentTypeViewers[mimeType.lowercaseString];
+    FLEXCustomContentViewerFuture makeCustomViewer = FLEXManager2.sharedManager.customContentTypeViewers[mimeType.lowercaseString];
 
     if (makeCustomViewer) {
         UIViewController *viewer = makeCustomViewer(data);

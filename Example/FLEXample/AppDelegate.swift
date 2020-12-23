@@ -8,6 +8,8 @@
 
 import UIKit
 
+typealias FLEXManager = FLEXManager2
+
 @UIApplicationMain @objcMembers
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var repeatingLogExampleTimer: Timer!

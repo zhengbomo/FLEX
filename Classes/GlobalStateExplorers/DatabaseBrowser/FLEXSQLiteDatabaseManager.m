@@ -102,7 +102,7 @@ static NSString * const QUERY_TABLENAMES = @"SELECT name FROM sqlite_master WHER
     NSArray<NSArray<NSString *> *> *rows = [self executeStatement:QUERY_TABLENAMES].rows;
     return rows ? [rows flex_mapped:^id(NSArray *table, NSUInteger idx) {
         return table.firstObject;
-    }] ?: @[];
+    }] : @[];
 }
 
 - (NSArray<NSString *> *)queryAllColumnsOfTable:(NSString *)tableName {

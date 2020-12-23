@@ -14,9 +14,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface FLEXManager : NSObject
+@interface FLEXManager2 : NSObject
 
-@property (nonatomic, readonly, class) FLEXManager *sharedManager;
+@property (nonatomic, readonly, class) FLEXManager2 *sharedManager;
 
 @property (nonatomic, readonly) BOOL isHidden;
 @property (nonatomic, readonly) FLEXExplorerToolbar *toolbar;

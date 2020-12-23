@@ -2,7 +2,7 @@
 #include <objc/runtime.h>
 #include <dlfcn.h>
 
-@interface FLEXManager
+@interface FLEXManager2
 
 + (instancetype)sharedManager;
 - (void)showExplorer;
@@ -26,7 +26,7 @@
 }
 
 - (void)show {
-	[[objc_getClass("FLEXManager") sharedManager] showExplorer];
+	[[objc_getClass("FLEXManager2") sharedManager] showExplorer];
 }
 
 @end

@@ -11,7 +11,7 @@
 
 @class FLEXGlobalsEntry, FLEXExplorerViewController;
 
-@interface FLEXManager (Private)
+@interface FLEXManager2 (Private)
 
 @property (nonatomic, readonly) FLEXWindow *explorerWindow;
 @property (nonatomic, readonly) FLEXExplorerViewController *explorerViewController;

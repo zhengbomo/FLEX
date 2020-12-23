@@ -139,7 +139,7 @@
         weakSelf.filterDomains = domains;
         
         // 更新ui
-        [weakSelf updateSearchResults:weakSelf.searchText];
+        [weakSelf updateSearchResultsWithText:weakSelf.searchText];
     };
     UIViewController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
     [self presentViewController:nav animated:YES completion:nil];
@@ -287,7 +287,7 @@
     
     if (self.searchController.isActive) {
         [self updateTransactions];
-        [self updateSearchResults:self.searchText];
+        [self updateSearchResultsWithText:self.searchText];
         return;
     }
 
@@ -483,7 +483,7 @@
     }];
 }
 
-- (void)updateSearchResults:(NSString *)searchString {
+- (void)updateSearchResultsWithText:(NSString *)searchString {
     NSArray *methods = self.filterMethods;
     NSArray *domains = self.filterDomains;
     

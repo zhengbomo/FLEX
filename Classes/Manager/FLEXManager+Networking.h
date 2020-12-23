@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface FLEXManager (Networking)
+@interface FLEXManager2 (Networking)
 
 /// If this property is set to YES, FLEX will swizzle NSURLConnection*Delegate and NSURLSession*Delegate methods
 /// on classes that conform to the protocols. This allows you to view network activity history from the main FLEX menu.

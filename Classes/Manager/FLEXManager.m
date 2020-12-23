@@ -13,7 +13,7 @@
 #import "FLEXObjectExplorerViewController.h"
 #import "FLEXFileBrowserController.h"
 
-@interface FLEXManager () <FLEXWindowEventDelegate, FLEXExplorerViewControllerDelegate>
+@interface FLEXManager2 () <FLEXWindowEventDelegate, FLEXExplorerViewControllerDelegate>
 
 @property (nonatomic, readonly, getter=isHidden) BOOL hidden;
 
@@ -25,10 +25,10 @@
 
 @end
 
-@implementation FLEXManager
+@implementation FLEXManager2
 
 + (instancetype)sharedManager {
-    static FLEXManager *sharedManager = nil;
+    static FLEXManager2 *sharedManager = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         sharedManager = [self new];

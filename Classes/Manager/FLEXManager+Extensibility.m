@@ -18,11 +18,11 @@
 #import "FLEXFileBrowserController.h"
 #import "FLEXUtility.h"
 
-@interface FLEXManager (ExtensibilityPrivate)
+@interface FLEXManager2 (ExtensibilityPrivate)
 @property (nonatomic, readonly) UIViewController *topViewController;
 @end
 
-@implementation FLEXManager (Extensibility)
+@implementation FLEXManager2 (Extensibility)
 
 #pragma mark - Globals Screen Entries
 

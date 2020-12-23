@@ -200,7 +200,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     UIWindow *window = nil;
     NSString *subtitle = nil;
-    FLEXWindow *flex = FLEXManager.sharedManager.explorerWindow;
+    FLEXWindow *flex = FLEXManager2.sharedManager.explorerWindow;
     
     id cancelHandler = ^{
         [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
