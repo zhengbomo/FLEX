@@ -157,7 +157,7 @@ static NSInteger _fps = 0;
     NSString *fpsMsg = [NSString stringWithFormat:@"%@", @(_fps)];
     [self.fpsItem updateContent:fpsMsg];
     
-    NSString *cpuMsg = [NSString stringWithFormat:@"%@%%", @(FLEXSystemMonitorView.cpuUsage)];
+    NSString *cpuMsg = [NSString stringWithFormat:@"%.0f%%", FLEXSystemMonitorView.cpuUsage * 100];
     [self.cpuItem updateContent:cpuMsg];
     
     uint64_t memoryByte = FLEXSystemMonitorView.memoryUsage;
@@ -184,7 +184,7 @@ static NSInteger _fps = 0;
     }
 }
 
-/// 内存占用
+/// memory usage
 + (uint64_t)memoryUsage {
     task_vm_info_data_t vmInfo;
     mach_msg_type_number_t count = TASK_VM_INFO_COUNT;
@@ -194,8 +194,8 @@ static NSInteger _fps = 0;
     return vmInfo.phys_footprint;
 }
 
-/// CPU占用，需要除1000
-+ (integer_t)cpuUsage {
+/// CPU usage
++ (float)cpuUsage {
     thread_act_array_t threads; //int 组成的数组比如 thread[1] = 5635
     mach_msg_type_number_t threadCount = 0; //mach_msg_type_number_t 是 int 类型
     const task_t thisTask = mach_task_self();
@@ -218,12 +218,12 @@ static NSInteger _fps = 0;
             // 获取 CPU 使用率
             threadBaseInfo = (thread_basic_info_t)threadInfo;
             if (!(threadBaseInfo->flags & TH_FLAGS_IDLE)) {
-                cpuUsage += (threadBaseInfo->cpu_usage / TH_USAGE_SCALE);
+                cpuUsage += threadBaseInfo->cpu_usage;
             }
         }
     }
     assert(vm_deallocate(mach_task_self(), (vm_address_t)threads, threadCount * sizeof(thread_t)) == KERN_SUCCESS);
-    return cpuUsage;
+    return (float)cpuUsage / TH_USAGE_SCALE;
 }
 
 static uint64_t originInByte = 0;
